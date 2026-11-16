@@ -5,11 +5,21 @@
 #include "defer.hh"
 
 #include <SDL3/SDL.h>
+#include <vector>
+#include <functional>
 #include <iostream>
 
-namespace window {
+class window {
 
-    inline void run()
+    inline static std::vector<std::function<void()>> logic_functions_{};
+
+public:
+
+    inline static void add_logic(std::function<void()> func) {
+        logic_functions_.push_back(std::move(func));
+    }
+
+    inline static void run()
     {
         if (not SDL_Init(SDL_INIT_VIDEO)) {
             std::cerr << "Failed to initialise SDL: " << SDL_GetError() << "\n";
@@ -47,13 +57,16 @@ namespace window {
                 }
             }
 
+            for (auto const& func : logic_functions_) {
+                func();
+            }
+
             SDL_RenderClear(renderer);
             SDL_RenderPresent(renderer);
 
             SDL_Delay(16);
         }
     }
-
-} // namespace window
+};
 
 #endif /* ECS_EXAMPLE_WINDOW_H */
