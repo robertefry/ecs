@@ -1,0 +1,22 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "label": "CMake: configure example",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "${workspaceFolder}/example", "-B", "${workspaceFolder}/build/example"],
+            "group": { "kind": "build" },
+            "problemMatcher": []
+        },
+        {
+            "label": "CMake: build example",
+            "dependsOn": ["CMake: configure example"],
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "${workspaceFolder}/build/example"],
+            "group": { "kind": "build" },
+            "problemMatcher": ["$gcc"]
+        },
+    ]
+}
