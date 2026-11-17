@@ -1,10 +1,13 @@
 
 cmake_minimum_required(VERSION 3.21)
+include(cpm.cmake)
+include(standards.cmake)
 
 project("cpp_ecs" VERSION 0.1.0)
 
 add_library(ecs INTERFACE
 )
+target_set_standards(ecs)
 
 target_include_directories(ecs
   INTERFACE
