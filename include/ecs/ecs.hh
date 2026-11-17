@@ -54,6 +54,11 @@ namespace ecs {
         return get_component<component>(eid) != nullptr;
     }
 
+    template <typename component>
+    [[nodiscard]] auto components() -> auto const& {
+        return impl::storage<component>::data();
+    }
+
 } // namespace ecs
 
 #endif /* ECS_HH */
