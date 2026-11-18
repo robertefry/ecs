@@ -2,8 +2,9 @@
 #ifndef ECS_HH
 #define ECS_HH
 
+#include "ecs/sparset.hh"
+
 #include <cstddef>
-#include <unordered_map>
 #include <atomic>
 
 namespace ecs {
@@ -12,51 +13,48 @@ namespace ecs {
 
     namespace impl {
 
-        template <typename component>
+        template <typename Component>
         class storage {
-            std::unordered_map<ecs::entity,component> data_ {};
+            ecs::sparset<Component> data_ {};
         public:
             [[nodiscard]] static auto instance() -> storage& {
                 static storage s_storage;
                 return s_storage;
             }
-            [[nodiscard]] static auto data() -> auto& {
+            [[nodiscard]] static auto sparset() -> auto& {
                 return instance().data_;
             }
         };
 
     } // namespace impl
 
-    [[nodiscard]] auto make_entity() -> entity {
+    [[nodiscard]] inline auto make_entity() -> entity {
         static std::atomic_size_t s_entity_id_next {0};
         return s_entity_id_next.fetch_add(1, std::memory_order_acq_rel);
     }
 
-    template <typename component, typename... Args>
-    auto add_component(entity eid, Args&&... args) -> component& {
-        auto [it, _] = impl::storage<component>::data().emplace(
+    template <typename Component, typename... Args>
+    auto add_component(entity eid, Args&&... args) -> Component& {
+        auto [component, _] = impl::storage<Component>::sparset().emplace(
             eid, std::forward<Args>(args)...
         );
-        return it->second;
+        return component;
     }
 
-    template <typename component>
-    [[nodiscard]] auto get_component(entity eid) -> component* {
-        auto iter = impl::storage<component>::data().find(eid);
-        if (iter == impl::storage<component>::data().end()) {
-            return nullptr;
-        }
-        return &iter->second;
-    }
-
-    template <typename component>
+    template <typename Component>
     [[nodiscard]] auto has_component(entity eid) -> bool {
-        return get_component<component>(eid) != nullptr;
+        return impl::storage<Component>::sparset().contains(eid);
     }
 
-    template <typename component>
-    [[nodiscard]] auto components() -> auto const& {
-        return impl::storage<component>::data();
+    template <typename Component>
+    [[nodiscard]] auto get_component(entity eid) -> Component* {
+        return (not has_component<Component>(eid)) ? nullptr
+            : &impl::storage<Component>::sparset()[eid];
+    }
+
+    template <typename Component>
+    [[nodiscard]] auto components() -> std::span<Component> {
+        return impl::storage<Component>::sparset().span();
     }
 
 } // namespace ecs

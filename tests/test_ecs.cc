@@ -35,7 +35,7 @@ TEST_CASE("bench: get_component", "[benchmark][component]")
     {
         sum = 0;
         std::ranges::for_each(ecs::components<size_t>(), [&](auto const& item) {
-            sum += item.second;
+            sum += item;
         });
     };
 
