@@ -14,6 +14,9 @@ namespace ecs {
     template <typename T>
     class sparset {
 
+        // TODO: Instead of std::vector, we should make our own linked-list
+        // which groups into buckets of appropriate pageing size.
+        // [00,01,...,07] -> [08,09,...,15] -> ...
         std::vector<size_t> sparse_{};
         std::vector<size_t> dense_{};
         std::vector<T> data_;
@@ -123,6 +126,13 @@ namespace ecs {
             return std::span{data_};
         }
 
+        /**
+         * Access the underlying contiguous order of keys.
+         */
+        [[nodiscard]] auto keys() const -> std::span<size_t const> {
+            return std::span{dense_};
+        }
+
     // Modifiers
 
         /**
@@ -164,6 +174,20 @@ namespace ecs {
 
             dense_.pop_back();
             data_.pop_back();
+        }
+
+        /**
+         * Swap the elements indexed at two keys.
+         * If this container does not have elements at either key, **behaviour is undefined**.
+         */
+        void swap_at(size_t i, size_t j)
+        {
+            if (i == j) [[unlikely]] { return; }
+            using std::swap;
+            swap(data_[i], data_[j]);
+            swap(dense_[i], dense_[j]);
+            sparse_[dense_[i]] = j;
+            sparse_[dense_[j]] = i;
         }
 
         /**

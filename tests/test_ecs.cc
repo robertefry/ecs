@@ -12,12 +12,11 @@ TEST_CASE("get_component", "[component]")
         explicit Text(std::string data) : data{std::move(data)} {}
     };
 
-    auto const entity = ecs::make_entity();
-    ecs::add_component<Text>(entity, "Hello, World!");
+    auto const entity = ecs::entity();
+    ecs::emplace<Text>(entity, "Hello, World!");
 
-    auto text = ecs::get_component<Text>(entity);
-    REQUIRE(text != nullptr);
-    REQUIRE(text->data == "Hello, World!");
+    auto& text = ecs::get<Text>(entity);
+    REQUIRE(text.data == "Hello, World!");
 }
 
 TEST_CASE("bench: get_component", "[benchmark][component]")
@@ -25,8 +24,8 @@ TEST_CASE("bench: get_component", "[benchmark][component]")
     static constexpr size_t num_entities = 100'000;
 
     for (size_t i = 0; i < num_entities; ++i) {
-        auto eid = ecs::make_entity();
-        ecs::add_component<size_t>(eid, i);
+        auto eid = ecs::entity();
+        ecs::insert(eid, i);
     }
 
     volatile size_t sum = 0;
@@ -34,8 +33,8 @@ TEST_CASE("bench: get_component", "[benchmark][component]")
     BENCHMARK(std::format("num_entities = {}", num_entities))
     {
         sum = 0;
-        std::ranges::for_each(ecs::components<size_t>(), [&](auto const& item) {
-            sum += item;
+        ecs::for_each<size_t>([&](ecs::entity_t eid, size_t value) {
+            sum += value;
         });
     };
 
