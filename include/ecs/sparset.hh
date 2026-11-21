@@ -2,9 +2,10 @@
 #ifndef ECS_SPARSET_HH
 #define ECS_SPARSET_HH
 
-#include <vector>
-#include <span>
+#include <cstddef>
 #include <utility>
+#include <span>
+#include <vector>
 #include <limits>
 #include <format>
 #include <stdexcept>
