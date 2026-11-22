@@ -10,6 +10,7 @@ CPMAddPackage(
 CPMAddPackage("gh:catchorg/Catch2@3.16.1")
 
 add_executable(ecs_tests
+  test_bitset.cc
   test_ecs.cc
 )
 target_set_standards(ecs_tests)
